@@ -1,0 +1,25 @@
+ok so 
+
+what we can do 
+
+we need to interface with what bets exist 
+
+so we can have a factory contract 
+
+that spawns children contracts that serve as "pairs"
+
+kind of like how the factory uniswap contracts spawns contracts dedicated to pairs 
+
+the factory can spawn contracts dedicated to pairs of betters AND the token that they are betting on 
+
+Factory.sol 
+    |
+    |
+    |
+    V
+    0xA... vs. 0xB 
+        ETH bet 
+        0xA long, B short 
+            breakeven $3000
+            0xA wins if ETH > $3000
+            0xB wins if ETH < $3000

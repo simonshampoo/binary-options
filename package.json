@@ -1,5 +1,5 @@
 {
-    "name": "femplate",
+    "name": "twap",
     "description": "Robust Template for Foundry Projects",
     "author": "Andreas Bigger <andreas@nascent.xyz>",
     "license": "AGPL-3.0-only",
@@ -9,10 +9,10 @@
     ],
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/abigger87/femplate.git"
+        "url": "git+https://github.com/abigger87/twap.git"
     },
     "devDependencies": {
-        "prettier": "^2.3.1",
+        "prettier": "^2.5.1",
         "prettier-plugin-solidity": "^1.0.0-beta.13"
     },
     "scripts": {
@@ -20,6 +20,7 @@
         "sync": "make update",
         "test": "make test",
         "snapshot": "make snapshot",
-        "lint": "make lint"
+        "lint": "make lint",
+        "prettier": "prettier --write 'src/**/*.sol'"
     }
 }
