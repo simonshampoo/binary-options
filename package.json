@@ -22,5 +22,9 @@
         "snapshot": "make snapshot",
         "lint": "make lint",
         "prettier": "prettier --write 'src/**/*.sol'"
+    },
+    "dependencies": {
+        "@uniswap/v2-core": "^1.0.1",
+        "@uniswap/v2-periphery": "^1.1.0-beta.0"
     }
 }
