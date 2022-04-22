@@ -1,26 +1,29 @@
 pragma solidity 0.8.11;
 
 contract Bet is IBet {
-    address playerOne;
-    address playerTwo;
-    address token;
-    uint256 betTimeStart;
-    uint256 betTimeEnd;
-    uint256 playerOneAmount;
-    uint256 playerTwoAmount;
+    address public playerOne;
+    address public playerTwo;
+    address public token;
+    address public feesTo;
+    uint256 public betTimeStart;
+    uint256 public betTimeEnd;
+    uint256 public playerOneAmount;
+    uint256 public playerTwoAmount;
 
     constructor(
-        address _playerOne,
-        address _playerTwo,
-        address _token,
-        uint256 _betTimeStart,
-        uint256 _betTimeEnd,
-        uint256 _playerOneAmount,
-        uint256 _playerTwoAmount
-    ) {
+        address memory _playerOne,
+        address memory _playerTwo,
+        address memory _token,
+        address memory _feesTo,
+        uint256 memory _betTimeStart,
+        uint256 memory _betTimeEnd,
+        uint256 memory _playerOneAmount,
+        uint256 memory _playerTwoAmount
+    ) public {
         playerOne = _playerOne;
         playerTwo = _playerTwo;
         token = _token;
+        feesTo = _feesTo;
         betTimeStart = _betTimeStart;
         betTimeEnd = _betTimeEnd;
         playerOneAmount = _playerOneAmount;
@@ -29,18 +32,21 @@ contract Bet is IBet {
 
     modifier betHasEnded {
         require(block.timestamp >= betTimeEnd, "The bet hasn't ended yet.");
-        _; 
+        _;
     }
 
-    function calcProportionOfFunding(
-        uint256 partyOneAmount,
-        uint256 partyTwoAmount
-    ) public view returns (uint256);
-
-    function checkWinner() external view returns (address) betHasEnded {
+    function getPoolAmount(uint256 partyOneAmount, uint256 partyTwoAmount)
+        public
+        pure
+        returns (uint256)
+    {
+        return partyOneAmount + partyTwoAmount;
     }
 
-    function payWinner() external returns (bool) betHasEnded {
-
+    function checkWinner() external view betHasEnded returns (address) {
+        //now this is when we do that oracle shit
+        //if the price is
     }
+
+    function payWinner() external betHasEnded returns (bool) {}
 }

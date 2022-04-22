@@ -31,4 +31,16 @@ interface IBetFactory {
         uint256 playerOneAmount,
         uint256 playerTwoAmount
     ) external returns (address);
+
+    function allBetsLength() external view returns (uint256);
+
+    function getBetsOfAddress(address playerOne)
+        public
+        view
+        returns (address[]);
+
+    function getBetsBetweenTwoAddresses(address playerOne, address playerTwo)
+        public
+        view
+        returns (address[]);
 }

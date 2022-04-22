@@ -4,16 +4,16 @@ import "./interfaces/IBetFactory.sol";
 import "./Bet.sol";
 
 contract BetFactory is IBetFactory {
-    address public constant feesTo;
+    address public constant feesTo; // me, i take fees
+    uint256 public constant feeAmount; //how much i get. probably 0.30% of every bet
 
-    address[] public allBets;
+    address[] public allBets; // addresses of all the bet contracts
 
+    //returns an array of all the bet contracts created between two addresses
     mapping(address => mapping(address => address[])) public bets;
-    mapping(address => Bet[]) betsOfAddress;
 
-    function allBetsLength() external view returns (uint256) {
-        return allBets.length;
-    }
+    //all the bets contracts that a player has created/participated in
+    mapping(address => address) betsOfAddress;
 
     function createBet(
         address playerOne,
@@ -44,6 +44,7 @@ contract BetFactory is IBetFactory {
                 playerOne,
                 playerTwo,
                 token,
+                feesTo,
                 betTimeStart,
                 betTimeEnd,
                 playerOneAmount,
@@ -64,17 +65,19 @@ contract BetFactory is IBetFactory {
         allBets.push(bet);
     }
 
-    function getBetsOfAddress(address playerOne, address playerTwo)
-        public
-        view
-        returns (address[])
-    {
-        return bets[playerOne][playerTwo];
+    function allBetsLength() external view returns (uint256) {
+        return allBets.length;
+    }
+
+    function getBetsOfAddress(address playerOne) public view returns (Bet[]) {
+        return betsOfAddress[playerOne];
     }
 
     function getBetsBetweenTwoAddresses(address playerOne, address playerTwo)
         public
         view
         returns (address[])
-    {}
+    {
+        return bets[playerOne][playerTwo];
+    }
 }
