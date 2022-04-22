@@ -21,11 +21,11 @@ interface IBetFactory {
         uint256 playerTwoAmount
     );
 
-    // will create a new contract representing the bet between the two parties 
+    // will create a new contract representing the bet between the two parties
     function createBet(
-        address calldata playerOne,
-        address calldata playerTwo,
-        address calldata tokenAddress,
+        address playerOne,
+        address playerTwo,
+        address tokenAddress,
         uint256 startTime,
         uint256 endTime,
         uint256 playerOneAmount,

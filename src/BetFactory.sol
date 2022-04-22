@@ -4,11 +4,12 @@ import "./interfaces/IBetFactory.sol";
 import "./Bet.sol";
 
 contract BetFactory is IBetFactory {
-    address constant feesTo;
+    address public constant feesTo;
 
-    address[] allBets;
+    address[] public allBets;
 
-    mapping(address => mapping(address => address[])) bets;
+    mapping(address => mapping(address => address[])) public bets;
+    mapping(address => Bet[]) betsOfAddress;
 
     function allBetsLength() external view returns (uint256) {
         return allBets.length;
@@ -18,6 +19,7 @@ contract BetFactory is IBetFactory {
         address playerOne,
         address playerTwo,
         address token,
+        address feesTo,
         uint256 betTimeStart,
         uint256 betTimeEnd,
         uint256 playerOneAmount,
@@ -36,34 +38,43 @@ contract BetFactory is IBetFactory {
             playerOneAmount > 0 && playerTwoAmount > 0,
             "You must bet a nonzero value."
         );
-        bytes memory bytecode = type(Bet).creationCode;
+        bytes memory bytecode = abi.encodePacked(
+            type(Bet).creationCode,
+            abi.encode(
+                playerOne,
+                playerTwo,
+                token,
+                betTimeStart,
+                betTimeEnd,
+                playerOneAmount,
+                playerTwoAmount
+            )
+        );
         bytes32 salt = keccak(abi.encodePacked(playerOne, playerTwo, token));
 
         assembly {
-            bet := create2(0, add(bytecode, 32), mload(bytecode), salt)
-        }
-        if (
-            bets[playerOne][playerTwo] != token ||
-            bets[playerOne][playerTwo] == address(0)
-        ) {
-            bets[playerOne][playerTwo].push(token);
+            bet := create2(0, add(bytecode, 0x20), mload(bytecode), salt)
         }
 
-        if (
-            bets[playerTwo][playerOne] != token ||
-            bets[playerTwo][playerOne] == address(0)
-        ) {
-            bets[playerOne][playerTwo].push(token);
-        }
+        bets[playerOne][playerTwo].push(token);
+        bets[playerTwo][playerOne].push(token);
 
+        betsOfAddress[playerOne].push(bet);
+        betsOfAddress[playerTwo].push(bet);
         allBets.push(bet);
     }
 
-    function getBetsBetweenTwoAddresses(address playerOne, address playerTwo)
+    function getBetsOfAddress(address playerOne, address playerTwo)
         public
         view
         returns (address[])
     {
         return bets[playerOne][playerTwo];
     }
+
+    function getBetsBetweenTwoAddresses(address playerOne, address playerTwo)
+        public
+        view
+        returns (address[])
+    {}
 }
