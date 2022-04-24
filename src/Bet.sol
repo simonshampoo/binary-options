@@ -35,6 +35,10 @@ contract Bet is IBet {
         _;
     }
 
+    function isActiveBet() external returns (bool) {
+        return (block.timestamp <= betTimeEnd);
+    }
+
     function getPoolAmount(uint256 partyOneAmount, uint256 partyTwoAmount)
         public
         pure
@@ -49,4 +53,18 @@ contract Bet is IBet {
     }
 
     function payWinner() external betHasEnded returns (bool) {}
+
+    //for player 2 to accept the bet, they must send a tx that matches the bet amount set by player one.
+    receive() external payable {
+        if (msg.sender != playerTwo) {
+            refund(msg.sender);
+        }
+        else {
+
+        }
+    }
+
+    function refund(address payer) internal {
+        payer.call{value: msg.value}("");
+    }
 }

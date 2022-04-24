@@ -10,6 +10,7 @@ contract BetFactory is IBetFactory {
     address[] public allBets; // addresses of all the bet contracts
 
     //returns an array of all the bet contracts created between two addresses
+    // will return each bet contract created by two addresses
     mapping(address => mapping(address => address[])) public bets;
 
     //all the bets contracts that a player has created/participated in
@@ -26,17 +27,18 @@ contract BetFactory is IBetFactory {
         uint256 playerTwoAmount
     ) external returns (address) {
         require(
-            playerOne != address(0) && playerTwo != address(0),
-            "You cannot bet against the zero address. Cheater."
+            playerOne == msg.sender,
+            "You must participate in the bets you create."
         );
         require(
-            playerOne != playerOne && playerTwo != playerTwo,
-            "Identical addresses."
+            playerOne != address(0) && playerTwo != address(0),
+            "You cannot bet against the zero address."
         );
+        require(playerOne != playerTwo, "Identical addresses.");
         require(token != address(0), "Not a valid token.");
         require(
             playerOneAmount > 0 && playerTwoAmount > 0,
-            "You must bet a nonzero value."
+            "Both parties must bet a nonzero value."
         );
         bytes memory bytecode = abi.encodePacked(
             type(Bet).creationCode,
@@ -51,14 +53,16 @@ contract BetFactory is IBetFactory {
                 playerTwoAmount
             )
         );
-        bytes32 salt = keccak(abi.encodePacked(playerOne, playerTwo, token));
+        bytes32 memory salt = keccak256(
+            abi.encodePacked(playerOne, playerTwo, token)
+        );
 
         assembly {
             bet := create2(0, add(bytecode, 0x20), mload(bytecode), salt)
         }
 
-        bets[playerOne][playerTwo].push(token);
-        bets[playerTwo][playerOne].push(token);
+        bets[playerOne][playerTwo].push(bet);
+        bets[playerTwo][playerOne].push(bet);
 
         betsOfAddress[playerOne].push(bet);
         betsOfAddress[playerTwo].push(bet);
@@ -69,7 +73,11 @@ contract BetFactory is IBetFactory {
         return allBets.length;
     }
 
-    function getBetsOfAddress(address playerOne) public view returns (Bet[]) {
+    function getBetsOfAddress(address playerOne)
+        public
+        view
+        returns (address[])
+    {
         return betsOfAddress[playerOne];
     }
 
