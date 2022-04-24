@@ -19,7 +19,7 @@ contract Bet is IBet {
         uint256 memory _betTimeEnd,
         uint256 memory _playerOneAmount,
         uint256 memory _playerTwoAmount
-    ) public {
+    ) public payable {
         playerOne = _playerOne;
         playerTwo = _playerTwo;
         token = _token;
@@ -29,6 +29,8 @@ contract Bet is IBet {
         playerOneAmount = _playerOneAmount;
         playerTwoAmount = _playerTwoAmount;
     }
+
+    bool playersHaveAccepted;
 
     modifier betHasEnded {
         require(block.timestamp >= betTimeEnd, "The bet hasn't ended yet.");
@@ -58,9 +60,13 @@ contract Bet is IBet {
     receive() external payable {
         if (msg.sender != playerTwo) {
             refund(msg.sender);
-        }
-        else {
-
+        } else if (!playersHaveAccepted) {
+            if (msg.value == playerTwoAmount) {
+                //the bet is on!
+                playersHaveAccepted = true;
+            }
+        } else {
+            revert("Unknown error.");
         }
     }
 

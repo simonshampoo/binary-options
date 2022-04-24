@@ -3,72 +3,90 @@ pragma solidity 0.8.11;
 import "./interfaces/IBetFactory.sol";
 import "./Bet.sol";
 
+/// @title Factory for Bet contracts
+/// @author @shampoo_capital
+/// @notice Users will interface with this contract to create bets on ERC20 token prices with another address
 contract BetFactory is IBetFactory {
-    address public constant feesTo; // me, i take fees
-    uint256 public constant feeAmount; //how much i get. probably 0.30% of every bet
+    /// @notice STATE VARIABLES
+    address public immutable feesTo; // me, i take fees
+    uint256 public immutable feeAmount; //how much i get. probably 0.30% of every bet
 
-    address[] public allBets; // addresses of all the bet contracts
+    /// @notice ALL OF THE BET CONTRACTS CREATED
+    address[] public allBets;
 
-    //returns an array of all the bet contracts created between two addresses
-    // will return each bet contract created by two addresses
+    /// @notice ARRAY OF ALL THE BET CONTRACTS CREATED BY TWO ADDRESSES
     mapping(address => mapping(address => address[])) public bets;
 
-    //all the bets contracts that a player has created/participated in
+    /// @notice ALL OF THE BET CONTRACTS THAT A PLAYER HAS CREATED OR PARTICIPATED IN
     mapping(address => address) betsOfAddress;
 
+    constructor(address calldata _feesTo, uint256 calldata _feeAmount) public {
+        feesTo = _feesTo;
+        feeAmount = _feeAmount;
+    }
+
+    /**
+    @notice creates a new Bet contract between two parties, namely msg.sender and another address
+    @param challengee the other party in the bet 
+    @param token the ERC20 token they want to bet on 
+    @param betTimeStart when the bet begins 
+    @param betTimeEnd when the bet will end 
+    @param playerOneAmount the amount of ether the initial player puts down for the bet 
+    @param challengeeAmount the amount of ether the challengee puts down for the bet  
+    @return address of the Bet contract that is created 
+    **/
     function createBet(
-        address playerOne,
-        address playerTwo,
+        address challengee,
         address token,
-        address feesTo,
         uint256 betTimeStart,
         uint256 betTimeEnd,
         uint256 playerOneAmount,
-        uint256 playerTwoAmount
+        uint256 challengeeAmount
     ) external returns (address) {
         require(
-            playerOne == msg.sender,
-            "You must participate in the bets you create."
-        );
-        require(
-            playerOne != address(0) && playerTwo != address(0),
+            challengee != address(0),
             "You cannot bet against the zero address."
         );
-        require(playerOne != playerTwo, "Identical addresses.");
+        require(msg.sender != challengee, "Identical addresses.");
         require(token != address(0), "Not a valid token.");
         require(
-            playerOneAmount > 0 && playerTwoAmount > 0,
+            msg.value > 0 && challengeeAmount > 0,
             "Both parties must bet a nonzero value."
         );
         bytes memory bytecode = abi.encodePacked(
             type(Bet).creationCode,
             abi.encode(
-                playerOne,
-                playerTwo,
+                challengee,
                 token,
-                feesTo,
                 betTimeStart,
                 betTimeEnd,
                 playerOneAmount,
-                playerTwoAmount
+                challengeeAmount
             )
         );
         bytes32 memory salt = keccak256(
-            abi.encodePacked(playerOne, playerTwo, token)
+            abi.encodePacked(msg.sender, challengee, token)
         );
 
         assembly {
             bet := create2(0, add(bytecode, 0x20), mload(bytecode), salt)
         }
 
-        bets[playerOne][playerTwo].push(bet);
-        bets[playerTwo][playerOne].push(bet);
+        bets[msg.sender][challengee].push(bet);
+        bets[challengee][msg.sender].push(bet);
 
-        betsOfAddress[playerOne].push(bet);
-        betsOfAddress[playerTwo].push(bet);
+        betsOfAddress[msg.sender].push(bet);
+        betsOfAddress[challengee].push(bet);
         allBets.push(bet);
     }
 
+    /*
+    =======================================================
+    *                                                     *
+    *                     VIEW FUNCTIONS                  *
+    *                                                     *
+    =======================================================
+    */
     function allBetsLength() external view returns (uint256) {
         return allBets.length;
     }
