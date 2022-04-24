@@ -20,7 +20,7 @@ contract BetFactory is IBetFactory {
     /// @notice ALL OF THE BET CONTRACTS THAT A PLAYER HAS CREATED OR PARTICIPATED IN
     mapping(address => address) betsOfAddress;
 
-    constructor(address calldata _feesTo, uint256 calldata _feeAmount) public {
+    constructor(address _feesTo, uint256 _feeAmount) public {
         feesTo = _feesTo;
         feeAmount = _feeAmount;
     }
@@ -64,7 +64,7 @@ contract BetFactory is IBetFactory {
                 challengeeAmount
             )
         );
-        bytes32 memory salt = keccak256(
+        bytes32 salt = keccak256(
             abi.encodePacked(msg.sender, challengee, token)
         );
 
@@ -72,12 +72,12 @@ contract BetFactory is IBetFactory {
             bet := create2(0, add(bytecode, 0x20), mload(bytecode), salt)
         }
 
-        bets[msg.sender][challengee].push(bet);
-        bets[challengee][msg.sender].push(bet);
+        // bets[msg.sender][challengee].push(bet);
+        // bets[challengee][msg.sender].push(bet);
 
-        betsOfAddress[msg.sender].push(bet);
-        betsOfAddress[challengee].push(bet);
-        allBets.push(bet);
+        // betsOfAddress[msg.sender].push(bet);
+        // betsOfAddress[challengee].push(bet);
+        // allBets.push(bet);
     }
 
     /*
@@ -94,7 +94,7 @@ contract BetFactory is IBetFactory {
     function getBetsOfAddress(address playerOne)
         public
         view
-        returns (address[])
+        returns (address[] calldata)
     {
         return betsOfAddress[playerOne];
     }
@@ -102,7 +102,7 @@ contract BetFactory is IBetFactory {
     function getBetsBetweenTwoAddresses(address playerOne, address playerTwo)
         public
         view
-        returns (address[])
+        returns (address[] calldata)
     {
         return bets[playerOne][playerTwo];
     }

@@ -1,5 +1,7 @@
 pragma solidity 0.8.13;
 
+import "./interfaces/IBet.sol";
+
 contract Bet is IBet {
     address public playerOne;
     address public playerTwo;
@@ -11,14 +13,14 @@ contract Bet is IBet {
     uint256 public playerTwoAmount;
 
     constructor(
-        address memory _playerOne,
-        address memory _playerTwo,
-        address memory _token,
-        address memory _feesTo,
-        uint256 memory _betTimeStart,
-        uint256 memory _betTimeEnd,
-        uint256 memory _playerOneAmount,
-        uint256 memory _playerTwoAmount
+        address _playerOne,
+        address _playerTwo,
+        address _token,
+        address _feesTo,
+        uint256 _betTimeStart,
+        uint256 _betTimeEnd,
+        uint256 _playerOneAmount,
+        uint256 _playerTwoAmount
     ) public payable {
         playerOne = _playerOne;
         playerTwo = _playerTwo;

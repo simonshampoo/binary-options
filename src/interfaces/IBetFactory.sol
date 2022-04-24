@@ -37,10 +37,10 @@ interface IBetFactory {
     function getBetsOfAddress(address playerOne)
         public
         view
-        returns (address[]);
+        returns (address[] calldata);
 
     function getBetsBetweenTwoAddresses(address playerOne, address playerTwo)
         public
         view
-        returns (address[]);
+        returns (address[] calldata);
 }
