@@ -21,7 +21,7 @@ contract Bet is IBet {
         uint256 _betTimeEnd,
         uint256 _playerOneAmount,
         uint256 _playerTwoAmount
-    ) public payable {
+    ) payable {
         playerOne = _playerOne;
         playerTwo = _playerTwo;
         token = _token;
@@ -39,7 +39,12 @@ contract Bet is IBet {
         _;
     }
 
-    function isActiveBet() external returns (bool) {
+    function calcProportionOfFunding(
+        uint256 partyOneAmount,
+        uint256 partyTwoAmount
+    ) public view returns (uint256) {}
+
+    function isActiveBet() external view returns (bool) {
         return (block.timestamp <= betTimeEnd);
     }
 
@@ -73,6 +78,9 @@ contract Bet is IBet {
     }
 
     function refund(address payer) internal {
-        payer.call{value: msg.value}("");
+        (bool success,) = payer.call{value: msg.value}("");
+
+        require(success, "Something went wrong.");
+
     }
 }

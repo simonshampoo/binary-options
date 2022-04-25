@@ -23,24 +23,22 @@ interface IBetFactory {
 
     // will create a new contract representing the bet between the two parties
     function createBet(
-        address playerOne,
-        address playerTwo,
-        address tokenAddress,
-        uint256 startTime,
-        uint256 endTime,
-        uint256 playerOneAmount,
-        uint256 playerTwoAmount
-    ) external returns (address);
+        address challengee,
+        address token,
+        uint256 betTimeStart,
+        uint256 betTimeEnd,
+        uint256 challengeeAmount
+    ) external payable returns (address);
 
     function allBetsLength() external view returns (uint256);
 
     function getBetsOfAddress(address playerOne)
-        public
+        external
         view
-        returns (address[] calldata);
+        returns (address[] memory );
 
     function getBetsBetweenTwoAddresses(address playerOne, address playerTwo)
-        public
+        external
         view
-        returns (address[] calldata);
+        returns (address[] memory);
 }

@@ -15,12 +15,13 @@ contract BetFactory is IBetFactory {
     address[] public allBets;
 
     /// @notice ARRAY OF ALL THE BET CONTRACTS CREATED BY TWO ADDRESSES
-    mapping(address => mapping(address => address[])) public bets;
+    mapping(address => mapping(address => address[]))
+        public betsBetweenToAddresses;
 
     /// @notice ALL OF THE BET CONTRACTS THAT A PLAYER HAS CREATED OR PARTICIPATED IN
-    mapping(address => address) betsOfAddress;
+    mapping(address => address[]) betsOfAddress;
 
-    constructor(address _feesTo, uint256 _feeAmount) public {
+    constructor(address _feesTo, uint256 _feeAmount) {
         feesTo = _feesTo;
         feeAmount = _feeAmount;
     }
@@ -31,7 +32,6 @@ contract BetFactory is IBetFactory {
     @param token the ERC20 token they want to bet on 
     @param betTimeStart when the bet begins 
     @param betTimeEnd when the bet will end 
-    @param playerOneAmount the amount of ether the initial player puts down for the bet 
     @param challengeeAmount the amount of ether the challengee puts down for the bet  
     @return address of the Bet contract that is created 
     **/
@@ -40,9 +40,8 @@ contract BetFactory is IBetFactory {
         address token,
         uint256 betTimeStart,
         uint256 betTimeEnd,
-        uint256 playerOneAmount,
         uint256 challengeeAmount
-    ) external returns (address) {
+    ) external payable returns (address) {
         require(
             challengee != address(0),
             "You cannot bet against the zero address."
@@ -53,31 +52,46 @@ contract BetFactory is IBetFactory {
             msg.value > 0 && challengeeAmount > 0,
             "Both parties must bet a nonzero value."
         );
-        bytes memory bytecode = abi.encodePacked(
-            type(Bet).creationCode,
-            abi.encode(
-                challengee,
-                token,
-                betTimeStart,
-                betTimeEnd,
-                playerOneAmount,
-                challengeeAmount
-            )
-        );
-        bytes32 salt = keccak256(
-            abi.encodePacked(msg.sender, challengee, token)
+        // bytes memory bytecode = abi.encodePacked(
+        //     type(Bet).creationCode,
+        //     abi.encode(
+        //         challengee,
+        //         token,
+        //         betTimeStart,
+        //         betTimeEnd,
+        //         challengeeAmount
+        //     )
+        // );
+        // bytes32 salt = keccak256(
+        //     abi.encodePacked(msg.sender, challengee, token)
+        // );
+
+        // assembly {
+        //     let bet := create2(0, add(bytecode, 32), mload(bytecode), salt)
+        // }
+
+    //i need to fix this. wtf going on?
+        Bet newBet = new Bet(
+            msg.sender,
+            challengee,
+            token,
+            feesTo,
+            betTimeStart,
+            betTimeEnd,
+            msg.value,
+            challengeeAmount
         );
 
-        assembly {
-            bet := create2(0, add(bytecode, 0x20), mload(bytecode), salt)
-        }
+        address bet = address(newBet);
 
-        bets[msg.sender][challengee].push(bet);
-        bets[challengee][msg.sender].push(bet);
+        betsBetweenToAddresses[msg.sender][challengee].push(bet);
+        betsBetweenToAddresses[challengee][msg.sender].push(bet);
 
         betsOfAddress[msg.sender].push(bet);
         betsOfAddress[challengee].push(bet);
         allBets.push(bet);
+
+        return bet; 
     }
 
     /*
@@ -94,7 +108,7 @@ contract BetFactory is IBetFactory {
     function getBetsOfAddress(address playerOne)
         public
         view
-        returns (address[] calldata)
+        returns (address[] memory)
     {
         return betsOfAddress[playerOne];
     }
@@ -102,8 +116,8 @@ contract BetFactory is IBetFactory {
     function getBetsBetweenTwoAddresses(address playerOne, address playerTwo)
         public
         view
-        returns (address[] calldata)
+        returns (address[] memory)
     {
-        return bets[playerOne][playerTwo];
+        return betsBetweenToAddresses[playerOne][playerTwo];
     }
 }

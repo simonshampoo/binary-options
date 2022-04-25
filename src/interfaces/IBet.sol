@@ -11,7 +11,7 @@ interface IBet {
     function calcProportionOfFunding(
         uint256 partyOneAmount,
         uint256 partyTwoAmount
-    ) public view returns (uint256);
+    ) external view returns (uint256);
 
     function checkWinner() external view returns (address);
 
