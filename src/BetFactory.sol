@@ -72,12 +72,12 @@ contract BetFactory is IBetFactory {
             bet := create2(0, add(bytecode, 0x20), mload(bytecode), salt)
         }
 
-        // bets[msg.sender][challengee].push(bet);
-        // bets[challengee][msg.sender].push(bet);
+        bets[msg.sender][challengee].push(bet);
+        bets[challengee][msg.sender].push(bet);
 
-        // betsOfAddress[msg.sender].push(bet);
-        // betsOfAddress[challengee].push(bet);
-        // allBets.push(bet);
+        betsOfAddress[msg.sender].push(bet);
+        betsOfAddress[challengee].push(bet);
+        allBets.push(bet);
     }
 
     /*
