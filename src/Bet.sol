@@ -21,7 +21,7 @@ contract Bet is IBet {
         uint256 _betTimeEnd,
         uint256 _playerOneAmount,
         uint256 _playerTwoAmount
-    ) payable {
+    ) public ayable {
         playerOne = _playerOne;
         playerTwo = _playerTwo;
         token = _token;
@@ -39,29 +39,28 @@ contract Bet is IBet {
         _;
     }
 
-    function calcProportionOfFunding(
-        uint256 partyOneAmount,
-        uint256 partyTwoAmount
-    ) public view returns (uint256) {}
-
     function isActiveBet() external view returns (bool) {
         return (block.timestamp <= betTimeEnd);
     }
 
-    function getPoolAmount(uint256 partyOneAmount, uint256 partyTwoAmount)
-        public
-        pure
-        returns (uint256)
-    {
-        return partyOneAmount + partyTwoAmount;
+    function payWinner() external betHasEnded returns (bool) {
+        require(block.timestamp >= betTimeEnd, "Bet is not done yet.");
+        uint256 currentTime = block.timestamp;
+        address winner = checkCurrentWinner();
+        uint256 amount = getPoolAmount();
+
+        emit BetEnded(address(this), currentTime);
+
+        winner.call({value: address(this).balance})("");
+
+        emit PaidWinner(address(this), winner, amount, currentTime);
     }
 
-    function checkWinner() external view betHasEnded returns (address) {
-        //now this is when we do that oracle shit
-        //if the price is
-    }
+    function refund(address payer) internal {
+        (bool success, ) = payer.call{value: msg.value}("");
 
-    function payWinner() external betHasEnded returns (bool) {}
+        require(success, "Something went wrong.");
+    }
 
     //for player 2 to accept the bet, they must send a tx that matches the bet amount set by player one.
     receive() external payable {
@@ -77,10 +76,19 @@ contract Bet is IBet {
         }
     }
 
-    function refund(address payer) internal {
-        (bool success,) = payer.call{value: msg.value}("");
+    /*
+    =======================================================
+    *                                                     *
+    *                     VIEW FUNCTIONS                  *
+    *                                                     *
+    =======================================================
+    */
+    function getPoolAmount() external view returns (uint256) {
+        return address(this).balance;
+    }
 
-        require(success, "Something went wrong.");
-
+    function checkCurrentWinner() public view betHasEnded returns (address) {
+        //now this is when we do that oracle shit
+        //if the price is
     }
 }

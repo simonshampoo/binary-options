@@ -52,37 +52,37 @@ contract BetFactory is IBetFactory {
             msg.value > 0 && challengeeAmount > 0,
             "Both parties must bet a nonzero value."
         );
-        // bytes memory bytecode = abi.encodePacked(
-        //     type(Bet).creationCode,
-        //     abi.encode(
-        //         challengee,
-        //         token,
-        //         betTimeStart,
-        //         betTimeEnd,
-        //         challengeeAmount
-        //     )
-        // );
-        // bytes32 salt = keccak256(
-        //     abi.encodePacked(msg.sender, challengee, token)
-        // );
 
-        // assembly {
-        //     let bet := create2(0, add(bytecode, 32), mload(bytecode), salt)
-        // }
-
-    //i need to fix this. wtf going on?
-        Bet newBet = new Bet(
-            msg.sender,
-            challengee,
-            token,
-            feesTo,
-            betTimeStart,
-            betTimeEnd,
-            msg.value,
-            challengeeAmount
+        address bet; 
+        bytes memory bytecode = abi.encodePacked(
+            type(Bet).creationCode,
+            abi.encode(
+                challengee,
+                token,
+                betTimeStart,
+                betTimeEnd,
+                challengeeAmount
+            )
+        );
+        bytes32 salt = keccak256(
+            abi.encodePacked(msg.sender, challengee, token)
         );
 
-        address bet = address(newBet);
+        assembly {
+            bet := create2(0, add(bytecode, 32), mload(bytecode), salt)
+        }
+
+    //  i need to fix this. wtf going on?
+    //     Bet newBet = new Bet(
+    //         msg.sender,
+    //         challengee,
+    //         token,
+    //         feesTo,
+    //         betTimeStart,
+    //         betTimeEnd,
+    //         msg.value,
+    //         challengeeAmount
+    //     );
 
         betsBetweenToAddresses[msg.sender][challengee].push(bet);
         betsBetweenToAddresses[challengee][msg.sender].push(bet);

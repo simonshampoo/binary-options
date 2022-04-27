@@ -17,9 +17,14 @@ Factory.sol
     |
     |
     V
-    0xA... vs. 0xB 
-        ETH bet 
+    0xA... vs. 0xB... Bet contract 
+        ETH/DAI bet 
         0xA long, B short 
-            breakeven $3000
             0xA wins if ETH > $3000
-            0xB wins if ETH < $3000
+            0xB wins if ETH <= $3000
+        from this, we need to be able to calculate the price of the ETH/(DAI/USDT/USDC) pair 
+            - spot price is susceptible to price manipulation, no good
+            - we can calculate the twap and allow bets within some interval 
+            - for now, we will just calculate the spot price and adjust our code as needed 
+        no point in calculating the price off chain, i want an interopable betting protocol 
+        

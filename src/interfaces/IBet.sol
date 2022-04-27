@@ -1,19 +1,20 @@
 pragma solidity 0.8.13;
 
 interface IBet {
+    event BetBegan(address indexed betContract, uint256 startTime);
+
+    event BetEnded(address indexed betContract, uint256 endTime);
+
     event PaidWinner(
+        address indexed betContract,
         address indexed winner,
-        address indexed loser,
         uint256 amountWon,
         uint256 timePaid
     );
 
-    function calcProportionOfFunding(
-        uint256 partyOneAmount,
-        uint256 partyTwoAmount
-    ) external view returns (uint256);
+    function isActiveBet() external view returns (bool);
 
-    function checkWinner() external view returns (address);
+    function getPoolAmount() external view returns (uint256);
 
     function payWinner() external returns (bool);
 }
