@@ -7,6 +7,7 @@ contract Bet is IBet {
     address public playerTwo;
     address public token;
     address public feesTo;
+    address public peggedUSDToken;
     uint256 public betTimeStart;
     uint256 public betTimeEnd;
     uint256 public playerOneAmount;
@@ -16,6 +17,7 @@ contract Bet is IBet {
         address _playerOne,
         address _playerTwo,
         address _token,
+        address _peggedUSDToken,
         address _feesTo,
         uint256 _betTimeStart,
         uint256 _betTimeEnd,
@@ -25,6 +27,7 @@ contract Bet is IBet {
         playerOne = _playerOne;
         playerTwo = _playerTwo;
         token = _token;
+        peggedUSDToken = _peggedUSDToken;
         feesTo = _feesTo;
         betTimeStart = _betTimeStart;
         betTimeEnd = _betTimeEnd;

@@ -21,7 +21,7 @@ contract BetFactory is IBetFactory {
     /// @notice ALL OF THE BET CONTRACTS THAT A PLAYER HAS CREATED OR PARTICIPATED IN
     mapping(address => address[]) betsOfAddress;
 
-    constructor(address _feesTo, uint256 _feeAmount) {
+    constructor(address _feesTo, uint256 _feeAmount) public {
         feesTo = _feesTo;
         feeAmount = _feeAmount;
     }
@@ -30,6 +30,7 @@ contract BetFactory is IBetFactory {
     @notice creates a new Bet contract between two parties, namely msg.sender and another address
     @param challengee the other party in the bet 
     @param token the ERC20 token they want to bet on 
+    @param peggedUSDToken the USD-pegged token that they will choose (DAI or USDC)
     @param betTimeStart when the bet begins 
     @param betTimeEnd when the bet will end 
     @param challengeeAmount the amount of ether the challengee puts down for the bet  
@@ -38,10 +39,16 @@ contract BetFactory is IBetFactory {
     function createBet(
         address challengee,
         address token,
+        address peggedUSDToken,
         uint256 betTimeStart,
         uint256 betTimeEnd,
         uint256 challengeeAmount
     ) external payable returns (address) {
+        require(
+            peggedUSDToken == 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 ||
+                peggedUSDToken == 0x6b175474e89094c44da98b954eedeac495271d0f,
+            "Must be DAI or USDC."
+        );
         require(
             challengee != address(0),
             "You cannot bet against the zero address."
@@ -53,14 +60,18 @@ contract BetFactory is IBetFactory {
             "Both parties must bet a nonzero value."
         );
 
-        address bet; 
+        address bet;
         bytes memory bytecode = abi.encodePacked(
             type(Bet).creationCode,
             abi.encode(
+                msg.sender,
                 challengee,
                 token,
+                peggedUSDToken,
+                feesTo,
                 betTimeStart,
                 betTimeEnd,
+                msg.value,
                 challengeeAmount
             )
         );
@@ -72,18 +83,6 @@ contract BetFactory is IBetFactory {
             bet := create2(0, add(bytecode, 32), mload(bytecode), salt)
         }
 
-    //  i need to fix this. wtf going on?
-    //     Bet newBet = new Bet(
-    //         msg.sender,
-    //         challengee,
-    //         token,
-    //         feesTo,
-    //         betTimeStart,
-    //         betTimeEnd,
-    //         msg.value,
-    //         challengeeAmount
-    //     );
-
         betsBetweenToAddresses[msg.sender][challengee].push(bet);
         betsBetweenToAddresses[challengee][msg.sender].push(bet);
 
@@ -91,7 +90,7 @@ contract BetFactory is IBetFactory {
         betsOfAddress[challengee].push(bet);
         allBets.push(bet);
 
-        return bet; 
+        return bet;
     }
 
     /*
