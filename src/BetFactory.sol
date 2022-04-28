@@ -119,4 +119,33 @@ contract BetFactory is IBetFactory {
     {
         return betsBetweenToAddresses[playerOne][playerTwo];
     }
+
+    function getCreationBytecode(
+        address _playerOne,
+        address _playerTwo,
+        address _token,
+        address _peggedUSDToken,
+        address _feesTo,
+        uint256 _betTimeStart,
+        uint256 _betTimeEnd,
+        uint256 _playerOneAmount,
+        uint256 _playerTwoAmount
+    ) internal pure returns (bytes memory) {
+        bytes memory bytecode = type(Bet).creationCode;
+        return
+            abi.encodePacked(
+                bytecode,
+                abi.encode(
+                    _playerOne,
+                    _playerTwo,
+                    _token,
+                    _peggedUSDToken,
+                    _feesTo,
+                    _betTimeStart,
+                    _betTimeEnd,
+                    _playerOneAmount,
+                    _playerTwoAmount
+                )
+            );
+    }
 }

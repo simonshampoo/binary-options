@@ -23,7 +23,7 @@ contract Bet is IBet {
         uint256 _betTimeEnd,
         uint256 _playerOneAmount,
         uint256 _playerTwoAmount
-    ) public ayable {
+    ) public payable {
         playerOne = _playerOne;
         playerTwo = _playerTwo;
         token = _token;
